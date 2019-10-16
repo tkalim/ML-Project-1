@@ -1,5 +1,6 @@
 from scripts.proj1_helpers import *
 import numpy as np
+import matplotlib.pyplot as plt
 
 def least_squares_GD(y, tx, initial_w, max_iters, gamma):
     """Linear regression using gradient descent.
