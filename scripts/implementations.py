@@ -1,4 +1,4 @@
-from scripts.proj1_helpers import *
+from proj1_helpers import *
 import numpy as np
 import matplotlib.pyplot as plt
 
