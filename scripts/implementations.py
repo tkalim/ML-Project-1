@@ -62,7 +62,7 @@ def least_squares(y, tx):
     return w, loss
 
 
-def ridge_regression(y, tx, lambda_):
+#def ridge_regression(y, tx, lambda_):
     """Ridge regression using normal equations.
 
     Parameters:
@@ -73,12 +73,21 @@ def ridge_regression(y, tx, lambda_):
     Returns: 
     optimal weights and loss for the ridge regression
     """
-    N = tx.shape[1]
-    a = np.dot(np.transpose(tx), tx) + (lambda_ * np.identity(N))
-    b = np.dot(np.transpose(tx), y)
-    w = np.linalg.solve(a, b)
-    loss = compute_loss(y, tx, w)
-    return w, loss
+#    N = tx.shape[1]
+#    a = np.dot(np.transpose(tx), tx) + (lambda_ * np.identity(N))
+#    b = np.dot(np.transpose(tx), y)
+#    w = np.linalg.solve(a, b)
+#    loss = compute_loss(y, tx, w)
+#    return w, loss
+
+def ridge_regression(y, tx, lamb):
+    """implement ridge regression."""
+    aI = lamb * np.identity(tx.shape[1])
+    a = tx.T.dot(tx) + aI
+    b = tx.T.dot(y)
+    w= np.linalg.solve(a, b)
+    loss = compute_loss(y,tx,w)
+    return w , loss
 
 
 def logistic_regression(y, tx, initial_w, max_iters, gamma):
@@ -99,12 +108,11 @@ def logistic_regression(y, tx, initial_w, max_iters, gamma):
     for n_iter in range(max_iters):
         yx = np.dot(y, tx)
         yxw = np.dot(yx, w)
-        print(yxw)
         log = np.log(1 + np.exp(np.dot(tx, w)))
         loss = (log - yxw).sum()
 
         # Update rule
-        sig = sigma(np.dot(tx, w))
+        sig = sigmoid(np.dot(tx, w))
         sig = sig - y
         grad = np.dot(np.transpose(tx), sig)
         w = w - (gamma * grad)
@@ -122,7 +130,8 @@ def log_reg(y,tx,initial_w,max_iters,gamma):
 def calculate_loss(y, tx, w):
     """compute the cost by negative log likelihood."""
     pred = sigmoid(tx.dot(w))
-    loss = y.T.dot(np.log(pred)) + (1 - y).T.dot(np.log(1 - pred))
+    epsilon = 1e-5  
+    loss = y.T.dot(np.log(pred+ epsilon)) + (1 - y).T.dot(np.log(1 - pred+ epsilon))
     return np.squeeze(- loss)
 
 def calculate_gradient(y, tx, w):
