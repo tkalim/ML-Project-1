@@ -95,9 +95,11 @@ def logistic_regression(y, tx, initial_w, max_iters, gamma):
     optimal weights and its corresponding loss for logistic regression
     """
     w = initial_w
+    print('log reg')
     for n_iter in range(max_iters):
         yx = np.dot(y, tx)
         yxw = np.dot(yx, w)
+        print(yxw)
         log = np.log(1 + np.exp(np.dot(tx, w)))
         loss = (log - yxw).sum()
 
@@ -107,6 +109,28 @@ def logistic_regression(y, tx, initial_w, max_iters, gamma):
         grad = np.dot(np.transpose(tx), sig)
         w = w - (gamma * grad)
     return w, loss
+
+def log_reg(y,tx,initial_w,max_iters,gamma):
+    w=initial_w
+    for n_iter in range(max_iters):
+        loss = calculate_loss(y, tx, w)
+        grad = calculate_gradient(y, tx, w)
+        w -= gamma * grad
+    return loss, w
+    
+
+def calculate_loss(y, tx, w):
+    """compute the cost by negative log likelihood."""
+    pred = sigmoid(tx.dot(w))
+    loss = y.T.dot(np.log(pred)) + (1 - y).T.dot(np.log(1 - pred))
+    return np.squeeze(- loss)
+
+def calculate_gradient(y, tx, w):
+    """compute the gradient of loss."""
+    pred = sigmoid(tx.dot(w))
+    grad = tx.T.dot(pred - y)
+    return grad
+    
 
 
 def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma):
@@ -133,7 +157,7 @@ def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma):
         loss = (log - yxw).sum() - (lambda_ / 2) * np.square((np.linalg.norm(w)))
 
         # Update rule
-        sig = sigma(np.dot(tx, w))
+        sig = sigmoid(np.dot(tx, w))
         sig = sig - y
         grad = np.dot(np.transpose(tx), sig) + (2 * lambda_ * w)
         w = w - (gamma * grad)
@@ -218,6 +242,9 @@ def sigma(x):
     sigma function applied on the given vector
     """
     return np.exp(x) / (1 + np.exp(x))
+
+def sigmoid(x):
+    return 1.0 / (1 + np.exp(-x))
 
 
 def batch_iter(y, tx, batch_size, num_batches=1, shuffle=True):
