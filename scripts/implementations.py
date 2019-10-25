@@ -62,7 +62,7 @@ def least_squares(y, tx):
     return w, loss
 
 
-#def ridge_regression(y, tx, lambda_):
+def ridge_regression(y, tx, lambda_):
     """Ridge regression using normal equations.
 
     Parameters:
@@ -73,21 +73,14 @@ def least_squares(y, tx):
     Returns: 
     optimal weights and loss for the ridge regression
     """
-#    N = tx.shape[1]
-#    a = np.dot(np.transpose(tx), tx) + (lambda_ * np.identity(N))
-#    b = np.dot(np.transpose(tx), y)
-#    w = np.linalg.solve(a, b)
-#    loss = compute_loss(y, tx, w)
-#    return w, loss
+    N = tx.shape[1]
+    a = np.dot(np.transpose(tx), tx) + (lambda_ * np.identity(N))
+    b = np.dot(np.transpose(tx), y)
+    w = np.linalg.solve(a, b)
+    loss = compute_loss(y, tx, w)
+    return w, loss
 
-def ridge_regression(y, tx, lamb):
-    """implement ridge regression."""
-    aI = lamb * np.identity(tx.shape[1])
-    a = tx.T.dot(tx) + aI
-    b = tx.T.dot(y)
-    w= np.linalg.solve(a, b)
-    loss = compute_loss(y,tx,w)
-    return w , loss
+
 
 
 def logistic_regression(y, tx, initial_w, max_iters, gamma):
@@ -498,7 +491,8 @@ def cross_validation(y, x, k_indices, k, lambda_, degree):
     tx_tr = build_poly(x_tr, degree)
     tx_te = build_poly(x_te, degree)
     # ridge regression
-    w, _ = ridge_regression(y_tr, tx_tr, lambda_)
+    weights = np.zeros(30)
+    w, _ = least_squares_GD(y_tr,x_tr,weights,20,lambda_)
     # calculate the loss for train and test data
     loss_tr = np.sqrt(2 * compute_loss(y_tr, tx_tr, w))
     loss_te = np.sqrt(2 * compute_loss(y_te, tx_te, w))
@@ -547,7 +541,7 @@ def best_degree_selection(y, x, degrees, k_fold, lambdas, seed=1):
 
     return degrees[ind_best_degree]
 
-def cross_validation_visualization(lambds, mse_tr, mse_te,b):
+def cross_validation_visualization(lambds, mse_tr, mse_te):
     """visualization the curves of mse_tr and mse_te.
 
     Parameters:
@@ -566,4 +560,4 @@ def cross_validation_visualization(lambds, mse_tr, mse_te,b):
     plt.title("cross validation")
     plt.legend(loc=2)
     plt.grid(True)
-    plt.savefig("cross_validation for bucket "+str(b))
+    plt.savefig("cross_validation for bucket ")
