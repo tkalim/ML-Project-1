@@ -361,6 +361,7 @@ def normalize(x):
     """
     res = x.copy()
     for i in range(0, res.shape[1]):
+        # here we avoid normalizing the categorical feature, which is in the 22nd column.
         if i == 22:
             continue
 
@@ -380,12 +381,13 @@ def normalize(x):
         for j in range(len(res[:, i])):
             if np.isnan(res[j][i]):
                 res[j][i] = median
-                # print(median)
                 res[j][i] -= mean
             else:
                 res[j][i] -= mean
             res[j][i] /= std
     return res
+
+
 
 
 def replace_999_with_nan(x):
@@ -404,7 +406,7 @@ def replace_999_with_nan(x):
 
 def get_buckets(x):
     """Splits the dataset into 8 buckets.
-    Based on 4 values (0, 1, 2, 3) of PRI_jet_num and 2 values (defined or -999) of DER_mass_MMC.
+    Based on 4 values (0, 1, 2, 3) of PRI_jet_num and 2 values (defined or nan) of DER_mass_MMC.
 
     Parameters:
     x: Our dataset
@@ -418,12 +420,16 @@ def get_buckets(x):
         x_jet_feature = x[x[:, 22] == i]
 
         # Get all rows where DER_mass_MMC defined and undefined
-        xi_defined = x_jet_feature[x_jet_feature[:, 0] != -999.0]
-        xi_undefined = x_jet_feature[x_jet_feature[:, 0] == -999.0]
+        xi_defined = x_jet_feature[~np.isnan(x_jet_feature[:, 0])]
+        xi_undefined = x_jet_feature[np.isnan(x_jet_feature[:,0])]
+ 
+
 
         result.append(xi_defined)
         result.append(xi_undefined)
     return result
+
+
 
 
 def get_id_buckets(x):
@@ -439,8 +445,8 @@ def get_id_buckets(x):
     id_buckets = []
     for i in range(0, 4):
         x_jet_feature = x[x[:, 1] == i]
-        xi_defined = x_jet_feature[x_jet_feature[:, -1] != -999.0]
-        xi_undefined = x_jet_feature[x_jet_feature[:, -1] == -999.0]
+        xi_defined = x_jet_feature[x_jet_feature[:, -1] != np.nan]
+        xi_undefined = x_jet_feature[x_jet_feature[:, -1] == np.nan]
         id_buckets.append(xi_defined)
         id_buckets.append(xi_undefined)
 
