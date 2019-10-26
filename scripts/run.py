@@ -37,9 +37,23 @@ def get_accuracy(train_buckets, test_buckets, test_y_buckets, weights, degree_an
     print(f"Accuracy = {total_accuracy}")
     return total_accuracy
 
+def train(buckets, y_buckets, degrees, lambdas):
+    print("start training")
+    weights = []
+    for i in range(len(buckets)):
+        degree = best_degree_lambda[i]["degree"] #TODO: change it 
+        lambda_ = best_degree_lambda[i]["lambda"]#TODO: change it with correct
+        w_rr, loss_rr = ridge_regression(y=y_buckets[i], tx=build_poly(buckets[i], degree), lambda_=lambda_)
+        print(w_rr.shape)
+        weights.append(w_rr)
+        print(f"trained on bucket {i}")
+    return weights
+
 
 
 if __name__ == '__main__':
     buckets, y_buckets = load_and_prep(TRAIN_DATA_PATH)
     submission_buckets, submission_y_buckets = load_and_prep(TEST_DATA_PATH)
+
+    weights = train(train_buckets=buckets, y_buckets=y_buckets, degrees=DEGREES, lambdas=LAMBDAS)
     
