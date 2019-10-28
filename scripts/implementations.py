@@ -2,6 +2,7 @@ from proj1_helpers import *
 import numpy as np
 import matplotlib.pyplot as plt
 
+
 def least_squares_GD(y, tx, initial_w, max_iters, gamma):
     """Linear regression using gradient descent.
 
@@ -139,6 +140,7 @@ def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma):
         w = w - (gamma * grad)
     return w, loss
 
+
 def compute_error(y, tx, w):
     """Calculates the error in the current prediction.
 
@@ -272,7 +274,7 @@ def compute_accuracy(w_train, x, y):
     for i in range(len(pred)):
         if pred[i] == y[i]:
             count += 1
-    return count/N
+    return count / N
 
 
 def split_data(tx, ty, ratio, seed=1):
@@ -316,7 +318,7 @@ def build_poly(x, degree):
     a matrix having the polynomial degree built
     """
     x_ret = x
-    for i in range(2, degree+1):
+    for i in range(2, degree + 1):
         x_ret = np.c_[x_ret, np.power(x, i)]
     return x_ret
 
@@ -339,7 +341,6 @@ def normalize(x):
         mean = np.nanmean(res[:, i])
         std = np.nanstd(res[:, i])
         median = np.nanmedian(res[:, i])
-
 
         # Change mean and standard deviation if column has all NaN values
         if np.isnan(median):
@@ -433,7 +434,7 @@ def build_k_indices(y, k_fold, seed):
     interval = int(num_row / k_fold)
     np.random.seed(seed)
     indices = np.random.permutation(num_row)
-    k_indices = [indices[k * interval: (k + 1) * interval] for k in range(k_fold)]
+    k_indices = [indices[k * interval : (k + 1) * interval] for k in range(k_fold)]
     return np.array(k_indices)
 
 
@@ -507,11 +508,12 @@ def best_degree_selection(y, x, degrees, k_fold, lambdas, seed=1):
 
     ind_best_degree = np.argmin(best_rmses)
     print("best lambdas : " + str(lambdas[ind_best_degree]))
-    print("best degree "+str(degrees[ind_best_degree]))
+    print("best degree " + str(degrees[ind_best_degree]))
 
     return {"degree": degrees[ind_best_degree], "lambda": lambdas[ind_best_degree]}
 
-def cross_validation_visualization(lambds, mse_tr, mse_te,b):
+
+def cross_validation_visualization(lambds, mse_tr, mse_te, b):
     """visualization the curves of mse_tr and mse_te.
 
     Parameters:
@@ -523,11 +525,12 @@ def cross_validation_visualization(lambds, mse_tr, mse_te,b):
     Returns: 
     cross validation figure
     """
-    plt.semilogx(lambds, mse_tr, marker=".", color='b', label='train error')
-    plt.semilogx(lambds, mse_te, marker=".", color='r', label='test error')
+    plt.semilogx(lambds, mse_tr, marker=".", color="b", label="train error")
+    plt.semilogx(lambds, mse_te, marker=".", color="r", label="test error")
     plt.xlabel("lambda")
     plt.ylabel("rmse")
     plt.title("cross validation")
     plt.legend(loc=2)
     plt.grid(True)
-    plt.savefig("cross_validation for bucket "+str(b))
+    plt.savefig("cross_validation for bucket " + str(b))
+
