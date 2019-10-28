@@ -95,6 +95,8 @@ def logistic_regression(y, tx, initial_w, max_iters, gamma):
     optimal weights and its corresponding loss for logistic regression
     """
     w = initial_w
+    print("init_w")
+    print(w)
     for n_iter in range(max_iters):
         yx = np.dot(y, tx)
         yxw = np.dot(yx, w)
@@ -106,6 +108,8 @@ def logistic_regression(y, tx, initial_w, max_iters, gamma):
         sig = sig - y
         grad = np.dot(np.transpose(tx), sig)
         w = w - (gamma * grad)
+        print("w" + str(n_iter))
+        print(w)
     return w, loss
 
 
@@ -124,6 +128,8 @@ def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma):
     the optimal weights and its corresponding loss
     """
     w = initial_w
+#     print("init_w")
+#     print(w)
     for n_iter in range(max_iters):
         yx = np.dot(y, tx)
         yxw = np.dot(yx, w)
@@ -131,13 +137,35 @@ def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma):
 
         # Add the 'penalty' term
         loss = (log - yxw).sum() - (lambda_ / 2) * np.square((np.linalg.norm(w)))
-
+#         print("loss")
+#         print(loss)
+#         print("tx.shape")
+#         print(tx.shape)
+#         print("w.shape")
+#         print(w.shape)
         # Update rule
         sig = sigma(np.dot(tx, w))
+#         print("sigbef")
+#         print(sig)
         sig = sig - y
         grad = np.dot(np.transpose(tx), sig) + (2 * lambda_ * w)
         w = w - (gamma * grad)
+#         print("sigaf")
+#         print(sig)
+#         print("grad")
+#         print(grad)
+#         print("w" + str(n_iter))
+#         print(w)
     return w, loss
+
+def compute_loss_reg_log_reg(y, tx, w, lam):
+    yx = np.dot(y, tx)
+    yxw = np.dot(yx, w)
+    log = np.log(1 + np.exp(np.dot(tx, w)))
+
+    # Add the 'penalty' term
+    loss = (log - yxw).sum() - (lam / 2) * np.square((np.linalg.norm(w)))
+    return loss
 
 def compute_error(y, tx, w):
     """Calculates the error in the current prediction.
@@ -217,6 +245,7 @@ def sigma(x):
     Returns: 
     sigma function applied on the given vector
     """
+#     print(x)
     return np.exp(x) / (1 + np.exp(x))
 
 
@@ -468,6 +497,102 @@ def cross_validation(y, x, k_indices, k, lambda_, degree):
     loss_te = np.sqrt(2 * compute_loss(y_te, tx_te, w))
     return loss_tr, loss_te, w
 
+def cross_validation_reg_log_reg(y, x, k_indices, k, lambda_, degree, maxIter, gamma_):
+    """return the loss of ridge regression.
+
+    Parameters:
+    y: output data
+    x: input data
+    k_indices: indices used for cross validation
+    k: the kth set is the test cross validation set
+    lambda_: penalising lambda of ridge regression
+    degree: polynomial degree of feature engineering
+
+    Returns: the training/testing loss considering the kth set as the test set
+    """
+    # get k'th subgroup in test, others in train
+    test_indices = k_indices[k]
+    train_indices = k_indices[~(np.arange(k_indices.shape[0]) == k)]
+    train_indices = train_indices.reshape(-1)
+    y_te = y[test_indices]
+    y_tr = y[train_indices]
+    x_te = x[test_indices]
+    x_tr = x[train_indices]
+    # form data with polynomial degree
+    tx_tr = build_poly(x_tr, degree)
+    tx_te = build_poly(x_te, degree)
+    initial_w = np.ones(tx_tr.shape[1])
+    # ridge regression
+    w, _ = reg_logistic_regression(y_tr, tx_tr, lambda_, initial_w, maxIter, gamma_)
+    # calculate the loss for train and test data
+#     loss_tr = np.sqrt(2 * compute_loss(y_tr, tx_tr, w))
+#     print('this is w')
+#     print(w)
+#     print("this is loss1")
+    loss_tr = compute_loss_reg_log_reg(y_tr, tx_tr, w, lambda_)
+#     loss_te = np.sqrt(2 * compute_loss(y_te, tx_te, w))
+    loss_te = compute_loss_reg_log_reg(y_te, tx_te, w, lambda_)
+#     print(loss_te)
+    return loss_tr, loss_te, w
+
+def best_degree_selection_reg_log_reg(y, x, degrees, k_fold, lambdas, maxIter, gammas, seed=1):
+    """
+
+    Parameters:
+    y: output data
+    x: input data
+    degrees: different polynomial degrees on which we wish to get the best one
+    k_fold: number of folds of the cross validation procedure
+    lambdas: different penalizing lambdas on which we wish to get the best
+    seed: random factor
+
+    Returns: 
+    the best polynomial degree based on least mse of the best lambda
+    """
+    # split data in k fold
+    k_indices = build_k_indices(y, k_fold, seed)
+
+    # for each degree, we compute the best lambdas and the associated rmse
+    best_lambdas = []
+    best_gammas = []
+    best_rmses = []
+    
+    # vary degree
+    for degree in degrees:
+        # cross validation
+#         print("lol")
+        rmse_te = []
+        for lambda_ in lambdas:
+            rmse_te_tmp_tab = []
+#             print('pf' + str(lambda_))
+            for gamma_ in gammas:
+#                 print("hello" + str(gamma_))
+                rmse_te_tmp = []
+                for k in range(k_fold):
+                    _, loss_te, _ = cross_validation_reg_log_reg(y, x, k_indices, k, lambda_, degree, maxIter, gamma_)
+                    rmse_te_tmp.append(loss_te)
+            
+                rmse_te_tmp_tab.append(np.mean(rmse_te_tmp))
+                print(rmse_te_tmp)
+        
+            rmse_te.append(rmse_te_tmp_tab)
+
+        print(rmse_te)
+        tmp = np.asarray(rmse_te)
+        print(np.unravel_index(np.argmin(tmp, axis=None), tmp.shape))
+        ind_lambda_opt, ind_gamma_opt = np.unravel_index(np.argmin(tmp,  axis=None), tmp.shape)
+
+        best_lambdas.append(lambdas[ind_lambda_opt])
+        best_gammas.append(gammas[ind_gamma_opt])
+        best_rmses.append(tmp[ind_lambda_opt, ind_gamma_opt])
+
+    ind_best_degree = np.argmin(best_rmses)
+    print("best lambdas : " + str(lambdas[ind_lambda_opt]))
+    print("best degree "+str(degrees[ind_best_degree]))
+    print("best gamma "+str(gammas[ind_gamma_opt]))
+
+    return {"degree": degrees[ind_best_degree], "lambda": lambdas[ind_lambda_opt], "gamma": gammas[ind_gamma_opt]}
+
 
 def best_degree_selection(y, x, degrees, k_fold, lambdas, seed=1):
     """
@@ -509,7 +634,7 @@ def best_degree_selection(y, x, degrees, k_fold, lambdas, seed=1):
     print("best lambdas : " + str(lambdas[ind_lambda_opt]))
     print("best degree "+str(degrees[ind_best_degree]))
 
-    return {"degree": degrees[ind_best_degree], "lambda": lambdas[ind_best_degree]}
+    return {"degree": degrees[ind_best_degree], "lambda": lambdas[ind_lambda_opt]}
 
 def cross_validation_visualization(lambds, mse_tr, mse_te,b):
     """visualization the curves of mse_tr and mse_te.
@@ -531,3 +656,35 @@ def cross_validation_visualization(lambds, mse_tr, mse_te,b):
     plt.legend(loc=2)
     plt.grid(True)
     plt.savefig("cross_validation for bucket "+str(b))
+    
+    
+def pc_reduction(X, threshold):
+    """Transforms the data to a new basis consisting of principle components
+    (vectors that are a linear combination of the original basis).
+    Then drops those principle components (i.e columns) which contain the least amount of information
+    
+    Parameters:
+    X : Data matrix (N x D)
+    threshold : minimum of cumulative variance percentage accepted when dropping dimensions
+    
+    Returns:
+    New data matrix to use in the learning process
+    The transform matrix needed to get the original data and to transform test and prediction data
+    """
+    
+    n, m = X.shape
+    C = np.cov(X.T)
+    
+    eigen_values, eigen_vectors = np.linalg.eig(C)
+    
+    total_eigen = np.sum(eigen_values)
+    
+    cumulative_var = np.cumsum(eigen_values/total_eigen)
+    
+    useless_indices= np.where(cumulative_var > threshold)
+    
+    transform_matrix = eigen_vectors[:,:useless_indices[0][0]]
+    
+    newX = np.dot(X, transform_matrix)
+    
+    return newX, transform_matrix
