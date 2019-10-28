@@ -27,9 +27,17 @@ def load_and_prep(data_path):
     return X, buckets, y_buckets, ids
 
 
-def get_accuracy(
-    train_buckets, test_buckets, test_y_buckets, weights, degree_and_lambda
-):
+def get_accuracy(train_buckets, test_buckets, test_y_buckets, weights, degree_and_lambda):
+    """Calculates the accuracy by comparing the predictions with given test data.
+
+    Parameters:
+    weights: The optimal weights after the training of each bucket
+    test_buckets: The x on which we wish to proceed prediction, divided into buckets
+    test_y_buckets: the actual output with which the comparison is going to take place, divided into buckets
+
+    Returns: 
+    the accuracy score
+    """
     correct_predictions = 0
     len_data = 0
     for i in range(len(train_buckets)):
@@ -62,6 +70,18 @@ def train(buckets, y_buckets, degrees, lambdas):
 
 
 def predict(ids, x, buckets, weights, degrees=DEGREES):
+    """Predicts labels according to previously trained weights
+
+    Parameters:
+    weights: The optimal weights after the training of each bucket
+    x: The x on which we wish to proceed prediction
+    buckets: x split into buckets
+    degrees: Degree with which we expand the features
+    ids: ids of submission data
+
+    Returns: 
+    submission and ids of submission
+    """
     ids_array = ids
     pri_jet_num_feature = x[:, 22]
     der_mass_mmc_col_feature = x[:, 0]
