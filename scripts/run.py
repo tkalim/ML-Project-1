@@ -4,7 +4,7 @@ from proj1_helpers import *
 
 TRAIN_DATA_PATH = "../data/train.csv"
 TEST_DATA_PATH = "../data/test.csv"
-OUTPUT_FILEPATH = "../data/output2.csv"
+OUTPUT_FILEPATH = "../data/output.csv"
 RATIO = 0.8
 SEED = 1
 DEGREES_LAMBDAS = [
