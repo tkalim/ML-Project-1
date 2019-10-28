@@ -4,7 +4,7 @@ from proj1_helpers import *
 
 TRAIN_DATA_PATH = "../data/train.csv"
 TEST_DATA_PATH = "../data/test.csv"
-OUTPUT_FILEPATH = "../data/output.csv"
+OUTPUT_FILEPATH = "../data/output2.csv"
 RATIO = 0.8
 SEED = 1
 DEGREES_LAMBDAS = [
@@ -24,7 +24,8 @@ def load_and_prep(data_path):
     into buckets and normalizing it
     """
     print(f"loading {data_path}")
-    y, X, ids = load_csv_data(data_path)
+    y, X, ids = load_csv_data(data_path, sub_sample=False)
+    X = np.column_stack((X, y))
     buckets = get_buckets(X)
     y_buckets = []
     for i in range(len(buckets)):
@@ -115,11 +116,12 @@ def predict(ids, x, buckets, weights, degrees_lambdas=DEGREES_LAMBDAS):
     prediction = prediction[:, 0]
 
     print("predictions complete")
-    return prediction, ids
+    return prediction
 
 
 if __name__ == "__main__":
     train_x, buckets, y_buckets, ids_train = load_and_prep(TRAIN_DATA_PATH)
+
     submission_x, submission_buckets, submission_y_buckets, ids_submission = load_and_prep(
         TEST_DATA_PATH
     )
@@ -128,7 +130,7 @@ if __name__ == "__main__":
         buckets=buckets, y_buckets=y_buckets, degrees_lambdas=DEGREES_LAMBDAS
     )
 
-    submission, ids_submission = predict(
+    submission = predict(
         ids=ids_submission,
         x=submission_x,
         buckets=submission_buckets,
@@ -138,4 +140,3 @@ if __name__ == "__main__":
 
     create_csv_submission(ids_submission, submission, OUTPUT_FILEPATH)
     print(f"{OUTPUT_FILEPATH} saved")
-
