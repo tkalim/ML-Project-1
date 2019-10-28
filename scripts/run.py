@@ -62,6 +62,9 @@ def train(buckets, y_buckets, degrees, lambdas):
 
 
 def predict(ids, x, buckets, weights, degrees=DEGREES):
+    """Applies the prediction on the submission buckets 
+    and puts them back in the right order with the right ids
+    """
     ids_array = ids
     pri_jet_num_feature = x[:, 22]
     der_mass_mmc_col_feature = x[:, 0]
@@ -91,7 +94,13 @@ if __name__ == "__main__":
         train_buckets=buckets, y_buckets=y_buckets, degrees=DEGREES, lambdas=LAMBDAS
     )
 
-    submission, ids_submission = predict(ids=ids_submission, x=submission_x, buckets=submission_buckets, weights=weights, degrees=DEGREES)
+    submission, ids_submission = predict(
+        ids=ids_submission,
+        x=submission_x,
+        buckets=submission_buckets,
+        weights=weights,
+        degrees=DEGREES,
+    )
 
     create_csv_submission(ids_submission, submission, "../data/output.csv")
 

@@ -509,7 +509,7 @@ def best_degree_selection(y, x, degrees, k_fold, lambdas, seed=1):
     print("best lambdas : " + str(lambdas[ind_lambda_opt]))
     print("best degree "+str(degrees[ind_best_degree]))
 
-    return {"degree": degrees[ind_best_degree], "lambda": lambdas[ind_best_degree]}
+    return {"degree": degrees[ind_best_degree], "lambda": lambdas[ind_lambda_opt]}
 
 def cross_validation_visualization(lambds, mse_tr, mse_te,b):
     """visualization the curves of mse_tr and mse_te.
