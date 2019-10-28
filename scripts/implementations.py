@@ -506,10 +506,10 @@ def best_degree_selection(y, x, degrees, k_fold, lambdas, seed=1):
         best_rmses.append(rmse_te[ind_lambda_opt])
 
     ind_best_degree = np.argmin(best_rmses)
-    print("best lambdas : " + str(lambdas[ind_lambda_opt]))
+    print("best lambdas : " + str(lambdas[ind_best_degree]))
     print("best degree "+str(degrees[ind_best_degree]))
 
-    return {"degree": degrees[ind_best_degree], "lambda": lambdas[ind_lambda_opt]}
+    return {"degree": degrees[ind_best_degree], "lambda": lambdas[ind_best_degree]}
 
 def cross_validation_visualization(lambds, mse_tr, mse_te,b):
     """visualization the curves of mse_tr and mse_te.
